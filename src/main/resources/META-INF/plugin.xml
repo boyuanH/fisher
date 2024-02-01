@@ -9,10 +9,8 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.boyuanh.fisher.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <statusBarWidgetFactory implementation="com.github.boyuanh.fisher.StatusBar.FisherStatusBarWidgetFactory"  id="FisherStatusBar"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.boyuanh.fisher.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
+
 </idea-plugin>
