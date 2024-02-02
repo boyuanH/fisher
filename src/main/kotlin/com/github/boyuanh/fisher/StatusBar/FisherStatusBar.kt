@@ -28,6 +28,9 @@ import org.jetbrains.annotations.ApiStatus.Internal
 import org.jetbrains.annotations.Nls
 import java.awt.Component
 import java.awt.event.MouseEvent
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.streams.asSequence
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -42,10 +45,29 @@ open class FisherStatusBar (private val dataContext: WidgetPresentationDataConte
         .also { it.tryEmit(Unit) }
     private val charCountRequests = MutableSharedFlow<CodePointCountTask>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
+    private var Reader_index:Int = -1
+
     init {
         val disposable = Disposer.newDisposable()
         scope.coroutineContext.job.invokeOnCompletion { Disposer.dispose(disposable) }
         check(charCountRequests.tryEmit(CodePointCountTask(text = "", startOffset = 0, endOffset = 0)))
+        val multicaster = EditorFactory.getInstance().allEditors
+        val xx = multicaster.size
+        val xde = 2
+//        timer_exec.scheduleAtFixedRate({
+//                                       check(updateTextRequests.tryEmit(Unit))
+//
+//        },10,1,TimeUnit.SECONDS)
+        for (idx in multicaster.indices){
+            val _edit = multicaster[idx]
+            _edit.addEditorMouseListener(object:EditorMouseListener{
+                override fun mouseClicked(event: EditorMouseEvent) {
+                    super.mouseClicked(event)
+                    check(updateTextRequests.tryEmit(Unit))
+                }
+            })
+
+        }
     }
 
     companion object{
@@ -59,6 +81,8 @@ open class FisherStatusBar (private val dataContext: WidgetPresentationDataConte
         public const val EMPTY_DISPLAY: String = "____________________"
         public var DISPLAY_CONTENT :String = EMPTY_DISPLAY
         public var ClickCount_Manu :Int = 0
+
+        private var timer_exec:ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
 
         private const val TargetSrcDict : String = "C:\\fishers\\"
         private const val FisherConfig : String = "cfg.json"
